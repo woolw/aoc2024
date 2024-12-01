@@ -51,13 +51,20 @@ func part1(lefts, rights []int) {
 
 func part2(lefts, rights []int) {
 	score := 0
+	seenMap := make(map[int]int)
 	for _, left := range lefts {
-		count := 0
+		count, ok := seenMap[left]
+		if ok {
+			score += (left * count)
+			continue
+		}
+
 		for _, right := range rights {
 			if left == right {
 				count += 1
 			}
 		}
+		seenMap[left] = count
 		score += (left * count)
 	}
 
