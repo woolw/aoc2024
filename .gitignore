@@ -24,5 +24,8 @@ go.work.sum
 # env file
 .env
 
-# mac specific
+# other
 .DS_Store
+bin
+obj
+.vs
