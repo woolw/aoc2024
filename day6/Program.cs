@@ -1,5 +1,4 @@
-﻿using System.Security.Cryptography.X509Certificates;
-using types;
+﻿using types;
 
 string content = File.ReadAllText("input");
 
