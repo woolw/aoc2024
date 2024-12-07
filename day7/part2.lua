@@ -16,7 +16,7 @@ local function iter_mixed_sum_pro(t_res, parts)
         for _, op in pairs(res) do
             table.insert(b_res, op * part)
             table.insert(b_res, op + part)
-            table.insert(b_res, tonumber(op .. part))
+            table.insert(b_res, op * 10 ^ math.floor(math.log(part, 10) + 1) + part)
         end
         res = b_res
         ::continue::
