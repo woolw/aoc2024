@@ -29,3 +29,6 @@ go.work.sum
 bin
 obj
 .vs
+Info.plist
+*.dSYM
+day8/day8
