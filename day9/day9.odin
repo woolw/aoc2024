@@ -78,33 +78,43 @@ main :: proc() {
 	sw := time.Stopwatch{}
 	time.stopwatch_reset(&sw)
 	time.stopwatch_start(&sw)
-	part1(&a_map, line, &id, m_pos)
+	part1(&a_map, &line, &id, m_pos)
 	time.stopwatch_stop(&sw)
 	fmt.printfln("Part 1 took %d", sw._accumulation)
 	time.stopwatch_reset(&sw)
 
 	id = 0
 	m_pos = -1
+	lis := make([dynamic]int)
+	defer delete(lis)
 	for ch, i in line {
 		count := int(ch - '0')
 		m_pos += count
-		if i % 2 == 1 {continue}
+		if i % 2 == 1 {
+			for ii := 0; ii < count; ii += 1 {
+				append(&lis, -1)
+			}
+			continue
+		}
 
+		for ii := 0; ii < count; ii += 1 {
+			append(&lis, id)
+		}
 		a_map[id] = count
 		id += 1
 	}
 
 	time.stopwatch_start(&sw)
-	part2(&a_map, line, id, m_pos)
+	part2(&a_map, &line, id, m_pos, &lis)
 	time.stopwatch_stop(&sw)
 	fmt.printfln("Part 2 took %d", sw._accumulation)
 }
 
-part1 :: proc(a_map: ^map[int]int, line: string, m_id: ^int, m_pos: int) {
+part1 :: proc(a_map: ^map[int]int, line: ^string, m_id: ^int, m_pos: int) {
 	p1: u128 = 0
 	pos := 0
 	m_idx := 0
-	total: for ch, i in line {
+	total: for ch, i in line^ {
 		if pos > m_pos {continue}
 		if i % 2 == 1 {
 			f_0 := false
@@ -146,60 +156,68 @@ part1 :: proc(a_map: ^map[int]int, line: string, m_id: ^int, m_pos: int) {
 	fmt.printfln("Part One: %d", p1)
 }
 
-part2 :: proc(a_map: ^map[int]int, line: string, m_id: int, m_pos: int) {
+kvp :: struct {
+	id:  int,
+	cap: int,
+}
+
+get_cap :: proc(lis: ^[dynamic]int, i: int) -> int {
+	res := 0
+	id: int
+	set := true
+	for ii := i; ii < len(lis); ii += 1 {
+		if set {
+			id = lis[ii]
+			set = false
+		}
+
+		if id != lis[ii] {
+			break
+		}
+		res += 1
+	}
+	return res
+}
+
+part2 :: proc(a_map: ^map[int]int, line: ^string, m_id: int, m_pos: int, lis: ^[dynamic]int) {
+	for i := m_id; i >= 0; i -= 1 {
+		capa := a_map[i]
+		if capa <= 0 {continue}
+
+		clear := false
+		for idx := 0; idx < len(lis^); idx += 1 {
+			id := lis[idx]
+			if id == i {
+				if !clear {
+					break
+				}
+				lis[idx] = -1
+			}
+
+			if c := get_cap(lis, idx); c < capa || id >= 0 || clear {
+				idx += c - 1
+				continue
+			}
+
+			for ii := 0; ii < capa; ii += 1 {
+				lis[ii + idx] = i
+			}
+			idx += capa - 1
+			clear = true
+		}
+	}
+
+
 	p1: u128 = 0
-	pos := 0
-	c_id := 0
-	seen := make(map[int]bool)
-	defer delete(seen)
-	total: for ch, i in line {
-		if pos > m_pos {continue}
-		if i % 2 == 1 {
-			space := int(ch - '0')
-			spaces: for i_id := m_id; i_id >= c_id; i_id -= 1 {
-				if space <= 0 {break spaces}
-				a := a_map[i_id]
-				if a <= 0 || a > space {
-					continue
-				}
 
-				seen[i_id] = true
-				for idx := 0; idx < a; idx += 1 {
-					//fmt.printfln("id %d at %d", i_id, pos)
-					p1 += u128(pos * i_id)
-					pos += 1
-					space -= 1
-				}
-				a_map[i_id] = 0
-				if i_id == c_id {c_id += 1}
-			}
-			for ii := 0; ii < space; ii += 1 {
-				pos += 1
-				//fmt.printfln("_ at %d", pos)
-			}
-
+	for id, idx in lis {
+		if id == -1 {
+			// fmt.print('.')
 			continue
 		}
+		// fmt.print(id)
 
-		a := a_map[c_id]
-		if a <= 0 {
-			if _, k := seen[c_id]; k {
-				for ii := 0; ii < int(ch - '0'); ii += 1 {
-					pos += 1
-					//fmt.printfln("_ at %d", pos)
-				}
-			}
-			c_id += 1
-			continue
-		}
-
-		for idx := 0; idx < a; idx += 1 {
-			//fmt.printfln("id %d at %d", c_id, pos)
-			p1 += u128(pos * c_id)
-			pos += 1
-		}
-		a_map[c_id] = 0
-		c_id += 1
+		p1 += u128(id * idx)
 	}
 
 	fmt.printfln("Part Two: %d", p1)
