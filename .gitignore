@@ -29,3 +29,4 @@ go.work.sum
 bin
 obj
 .vs
+ols.json
