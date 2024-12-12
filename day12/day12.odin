@@ -164,5 +164,84 @@ part1 :: proc(lines: ^[dynamic]string) {
 }
 
 part2 :: proc(lines: ^[dynamic]string) {
+	field_map := make(map[Vec2]struct {})
+	defer delete(field_map)
 
+	p2 := 0
+
+	for row, y in lines {
+		for _, x in row {
+			if (Vec2{x = x, y = y} in field_map) {
+				continue
+			}
+
+			curr := make(map[Vec2]struct {})
+			defer delete(curr)
+			pot := lines[y][x]
+
+			q := [dynamic]Vec2{Vec2{x = x, y = y}}
+			defer delete(q)
+
+			for len(q) > 0 {
+				pos := pop(&q)
+				if pos in field_map || pos in curr {
+					continue
+				}
+
+				if lines[pos.y][pos.x] != pot {
+					continue
+				}
+
+				curr[pos] = {}
+				field_map[pos] = {}
+
+				n_cells := [dynamic]Vec2 {
+					Vec2{x = pos.x - 1, y = pos.y},
+					Vec2{x = pos.x, y = pos.y - 1},
+					Vec2{x = pos.x + 1, y = pos.y},
+					Vec2{x = pos.x, y = pos.y + 1},
+				}
+				defer delete(n_cells)
+
+				for n in n_cells {
+					if n.x < 0 || n.x >= len(row) || n.y < 0 || n.y >= len(lines^) {
+						continue
+					}
+					if lines[n.y][n.x] == pot {
+						append(&q, n)
+					}
+				}
+			}
+
+			corn := 0
+			for pos in curr {
+				l := Vec2{x = pos.x - 1, y = pos.y} not_in curr
+				u := Vec2{x = pos.x, y = pos.y - 1} not_in curr
+				r := Vec2{x = pos.x + 1, y = pos.y} not_in curr
+				d := Vec2{x = pos.x, y = pos.y + 1} not_in curr
+
+				corn += int(l && u)
+				corn += int(r && u)
+				corn += int(l && d)
+				corn += int(r && d)
+
+				if !l && !u {
+					corn += int(Vec2{x = pos.x - 1, y = pos.y - 1} not_in curr)
+				}
+				if !r && !u {
+					corn += int(Vec2{x = pos.x + 1, y = pos.y - 1} not_in curr)
+				}
+				if !l && !d {
+					corn += int(Vec2{x = pos.x - 1, y = pos.y + 1} not_in curr)
+				}
+				if !r && !d {
+					corn += int(Vec2{x = pos.x + 1, y = pos.y + 1} not_in curr)
+				}
+			}
+
+			p2 += len(curr) * corn
+		}
+	}
+
+	fmt.printfln("Part Two: %d", p2)
 }
