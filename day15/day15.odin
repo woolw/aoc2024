@@ -130,68 +130,76 @@ part1 :: proc(w_map: ^[][]rune, mov: ^[]rune) {
 
 	buffs := make([dynamic]rune)
 	defer delete(buffs)
+	rx, ry := 0, 0
+	for line, y in w_map do for ch, x in line {
+		if ch != '@' {continue}
+
+		rx = x
+		ry = y
+		break
+	}
 	movement: for m in mov {
 		clear(&buffs)
 		append(&buffs, '.', '@')
-		for line, y in w_map do for ch, x in line {
-			if ch != '@' {continue}
-
-			switch m {
-			case '^':
-				for i := y - 1; i >= 0; i -= 1 {
-					switch w_map[i][x] {
-					case 'O':
-						append(&buffs, 'O')
-					case '.':
-						for buff, j in buffs {
-							w_map[y - j][x] = buff
-						}
-						fallthrough
-					case:
-						continue movement
+		switch m {
+		case '^':
+			for i := ry - 1; i >= 0; i -= 1 {
+				switch w_map[i][rx] {
+				case 'O':
+					append(&buffs, 'O')
+				case '.':
+					for buff, j in buffs {
+						w_map[ry - j][rx] = buff
 					}
+					ry -= 1
+					fallthrough
+				case:
+					continue movement
 				}
-			case '>':
-				for i := x + 1; i < len(line); i += 1 {
-					switch w_map[y][i] {
-					case 'O':
-						append(&buffs, 'O')
-					case '.':
-						for buff, j in buffs {
-							w_map[y][x + j] = buff
-						}
-						fallthrough
-					case:
-						continue movement
+			}
+		case '>':
+			for i := rx + 1; i < len(w_map[0]); i += 1 {
+				switch w_map[ry][i] {
+				case 'O':
+					append(&buffs, 'O')
+				case '.':
+					for buff, j in buffs {
+						w_map[ry][rx + j] = buff
 					}
+					rx += 1
+					fallthrough
+				case:
+					continue movement
 				}
-			case 'v':
-				for i := y + 1; i < len(w_map); i += 1 {
-					switch w_map[i][x] {
-					case 'O':
-						append(&buffs, 'O')
-					case '.':
-						for buff, j in buffs {
-							w_map[y + j][x] = buff
-						}
-						fallthrough
-					case:
-						continue movement
+			}
+		case 'v':
+			for i := ry + 1; i < len(w_map); i += 1 {
+				switch w_map[i][rx] {
+				case 'O':
+					append(&buffs, 'O')
+				case '.':
+					for buff, j in buffs {
+						w_map[ry + j][rx] = buff
 					}
+					ry += 1
+					fallthrough
+				case:
+					continue movement
 				}
-			case '<':
-				for i := x - 1; i >= 0; i -= 1 {
-					switch w_map[y][i] {
-					case 'O':
-						append(&buffs, 'O')
-					case '.':
-						for buff, j in buffs {
-							w_map[y][x - j] = buff
-						}
-						fallthrough
-					case:
-						continue movement
+			}
+		case '<':
+			for i := rx - 1; i >= 0; i -= 1 {
+				switch w_map[ry][i] {
+				case 'O':
+					append(&buffs, 'O')
+				case '.':
+					for buff, j in buffs {
+						w_map[ry][rx - j] = buff
 					}
+					rx -= 1
+					fallthrough
+				case:
+					continue movement
 				}
 			}
 		}
@@ -387,6 +395,16 @@ part2 :: proc(r_map: ^[][]rune, mov: ^[]rune) {
 
 	seen_x := make(map[int]int)
 	defer delete(seen_x)
+
+	rx, ry := 0, 0
+	for line, y in r_map do for ch, x in line {
+		if ch != '@' {continue}
+
+		rx = x
+		ry = y
+		break
+	}
+
 	movement: for m in mov {
 		clear(&seen_x)
 		clear(&buffs)
@@ -407,81 +425,81 @@ part2 :: proc(r_map: ^[][]rune, mov: ^[]rune) {
 			for line in r_map do fmt.println(line)
 		}
 
-		for line, y in r_map do for ch, x in line {
-			if ch != '@' {continue}
-
-			switch m {
-			case '^':
-				for i := y - 1; i >= 0; i -= 1 {
-					switch r_map[i][x] {
-					case '[':
-						fallthrough
-					case ']':
-						append(&buffs, r_map[i][x])
-					case '.':
-						if can_move(buffs[:], r_map, x, y, true, &seen_x) {
-							clear(&seen_x)
-							do_move(buffs[:], r_map, x, y, true, &seen_x)
-						}
-						fallthrough
-					case:
-						continue movement
+		switch m {
+		case '^':
+			for i := ry - 1; i >= 0; i -= 1 {
+				switch r_map[i][rx] {
+				case '[':
+					fallthrough
+				case ']':
+					append(&buffs, r_map[i][rx])
+				case '.':
+					if can_move(buffs[:], r_map, rx, ry, true, &seen_x) {
+						clear(&seen_x)
+						do_move(buffs[:], r_map, rx, ry, true, &seen_x)
+						ry -= 1
 					}
+					fallthrough
+				case:
+					continue movement
 				}
-			case '>':
-				for i := x + 1; i < len(line); i += 1 {
-					switch r_map[y][i] {
-					case '[':
-						fallthrough
-					case ']':
-						append(&buffs, r_map[y][i])
-					case '.':
-						for buff, j in buffs {
-							if j == 0 {
-								r_map[y][x] = '.'
-							}
-							r_map[y][x + j + 1] = buff
+			}
+		case '>':
+			for i := rx + 1; i < len(r_map[0]); i += 1 {
+				switch r_map[ry][i] {
+				case '[':
+					fallthrough
+				case ']':
+					append(&buffs, r_map[ry][i])
+				case '.':
+					for buff, j in buffs {
+						if j == 0 {
+							r_map[ry][rx] = '.'
 						}
-						fallthrough
-					case:
-						continue movement
+						r_map[ry][rx + j + 1] = buff
 					}
+					rx += 1
+					fallthrough
+				case:
+					continue movement
 				}
-			case 'v':
-				for i := y + 1; i >= 0; i += 1 {
-					switch r_map[i][x] {
-					case '[':
-						fallthrough
-					case ']':
-						append(&buffs, r_map[i][x])
-					case '.':
-						if can_move(buffs[:], r_map, x, y, false, &seen_x) {
-							clear(&seen_x)
-							do_move(buffs[:], r_map, x, y, false, &seen_x)
-						}
-						fallthrough
-					case:
-						continue movement
+			}
+		case 'v':
+			for i := ry + 1; i >= 0; i += 1 {
+				switch r_map[i][rx] {
+				case '[':
+					fallthrough
+				case ']':
+					append(&buffs, r_map[i][rx])
+				case '.':
+					if can_move(buffs[:], r_map, rx, ry, false, &seen_x) {
+						clear(&seen_x)
+						do_move(buffs[:], r_map, rx, ry, false, &seen_x)
+						ry += 1
 					}
+					fallthrough
+				case:
+					continue movement
 				}
-			case '<':
-				for i := x - 1; i >= 0; i -= 1 {
-					switch r_map[y][i] {
-					case '[':
-						fallthrough
-					case ']':
-						append(&buffs, r_map[y][i])
-					case '.':
-						for buff, j in buffs {
-							if j == 0 {
-								r_map[y][x] = '.'
-							}
-							r_map[y][x - (j + 1)] = buff
+			}
+		case '<':
+			for i := rx - 1; i >= 0; i -= 1 {
+				switch r_map[ry][i] {
+				case '[':
+					fallthrough
+				case ']':
+					append(&buffs, r_map[ry][i])
+				case '.':
+					for buff, j in buffs {
+						if j == 0 {
+							r_map[ry][rx] = '.'
 						}
-						fallthrough
-					case:
-						continue movement
+						r_map[ry][rx - (j + 1)] = buff
 					}
+					rx -= 1
+					fallthrough
+				case:
+					continue movement
 				}
 			}
 		}
