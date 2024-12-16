@@ -96,14 +96,16 @@ Direction :: enum i8 {
 	West  = 3,
 }
 
-Direction_Vectors :: [Direction]Vec2 {
+@(rodata)
+Direction_Vectors := [Direction]Vec2 {
 	.North = {0, -1},
 	.East  = {+1, 0},
 	.South = {0, +1},
 	.West  = {-1, 0},
 }
 
-Direction_Runes :: [Direction]rune {
+@(rodata)
+Direction_Runes := [Direction]rune {
 	.North = '^',
 	.East  = '>',
 	.South = 'v',
@@ -145,8 +147,6 @@ pretty_print_map :: proc(m: ^[dynamic]string) {
 
 part1 :: proc(maze: map[Vec2]rune, lines: ^[]string) -> int {
 	p1 := 0
-	dir_vec := Direction_Vectors
-	dir_rune := Direction_Runes
 
 	origin := Reindeer {
 		ori = .East,
@@ -163,7 +163,7 @@ part1 :: proc(maze: map[Vec2]rune, lines: ^[]string) -> int {
 		}
 		if ru == 'E' {
 			for dir in Direction {
-				if ru, ok := maze[pos + dir_vec[dir]]; ok && ru == '.' {
+				if ru, ok := maze[pos + Direction_Vectors[dir]]; ok && ru == '.' {
 					switch dir {
 					case .North:
 						e_count[.South] = {}
@@ -256,7 +256,7 @@ part1 :: proc(maze: map[Vec2]rune, lines: ^[]string) -> int {
 			}
 
 			new_dir := Reindeer {
-				pos = cur.pos + dir_vec[dir],
+				pos = cur.pos + Direction_Vectors[dir],
 				ori = dir,
 			}
 
@@ -280,7 +280,7 @@ part1 :: proc(maze: map[Vec2]rune, lines: ^[]string) -> int {
 					clear(&r_arr)
 					for col, x in row {
 						if new_dir.pos[0] == x && new_dir.pos[1] == y {
-							append(&r_arr, dir_rune[dir])
+							append(&r_arr, Direction_Runes[dir])
 							continue
 						}
 						append(&r_arr, col)
@@ -314,9 +314,6 @@ Reindeer2 :: struct {
 }
 
 part2 :: proc(maze: map[Vec2]rune, lines: ^[]string, score: int) {
-	dir_vec := Direction_Vectors
-	dir_rune := Direction_Runes
-
 	origin := Reindeer2 {
 		ori = .East,
 	}
@@ -430,7 +427,7 @@ part2 :: proc(maze: map[Vec2]rune, lines: ^[]string, score: int) {
 			}
 
 			new_dir := Reindeer2 {
-				pos = cur.pos + dir_vec[dir],
+				pos = cur.pos + Direction_Vectors[dir],
 				ori = dir,
 			}
 
@@ -461,7 +458,7 @@ part2 :: proc(maze: map[Vec2]rune, lines: ^[]string, score: int) {
 					clear(&r_arr)
 					for col, x in row {
 						if new_dir.pos[0] == x && new_dir.pos[1] == y {
-							append(&r_arr, dir_rune[dir])
+							append(&r_arr, Direction_Runes[dir])
 							continue
 						}
 						append(&r_arr, col)
