@@ -172,7 +172,7 @@ part1 :: proc(regs: ^[3]int, instrs: ^[]int) {
 	}
 
 	if len(print_buff) > 0 {
-		fmt.println("Part One: ")
+		fmt.print("Part One: ")
 
 		for buf, i in print_buff {
 			if i > 0 {
