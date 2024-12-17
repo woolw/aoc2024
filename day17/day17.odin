@@ -118,70 +118,53 @@ main :: proc() {
 	fmt.printfln("Part 2 took %d", sw._accumulation)
 }
 
-get_operant :: proc(regs: ^[3]int, operant_num: int) -> (int, bool) {
+get_operant :: proc(regs: ^[3]int, operant_num: int) -> int {
 	switch operant_num {
 	case 0:
-		return 0, true
+		return 0
 	case 1:
-		return 1, true
+		return 1
 	case 2:
-		return 2, true
+		return 2
 	case 3:
-		return 3, true
+		return 3
 	case 4:
-		return regs[0], true
+		return regs[0]
 	case 5:
-		return regs[1], true
+		return regs[1]
 	case 6:
-		return regs[2], true
+		return regs[2]
 	case:
-		return 0, false
+		log.panic("program invalid")
 	}
 }
 
 part1 :: proc(regs: ^[3]int, instrs: ^[]int) {
-	print_buff := make([dynamic]int)
-	defer delete(print_buff)
-	for i := 0; i < len(instrs); i += 2 {
-		literal_operant := instrs[i + 1]
-		combo_operant, valid := get_operant(regs, instrs[i + 1])
-		if !valid {
-			log.panic("program invalid")
-		}
+	fmt.print("Part One: ")
 
+	for i := 0; i < len(instrs); i += 2 {
 		switch instrs[i] {
 		case 0:
-			regs[0] = regs[0] >> uint(combo_operant)
+			regs[0] = regs[0] >> uint(get_operant(regs, instrs[i + 1]))
 		case 1:
-			regs[1] = regs[1] ~ literal_operant
+			regs[1] = regs[1] ~ instrs[i + 1]
 		case 2:
-			regs[1] = combo_operant %% 8
+			regs[1] = get_operant(regs, instrs[i + 1]) %% 8
 		case 3:
 			if regs[0] != 0 {
-				i = literal_operant - 2
+				i = instrs[i + 1] - 2
 			}
 		case 4:
 			regs[1] = regs[1] ~ regs[2]
 		case 5:
-			append(&print_buff, combo_operant %% 8)
+			fmt.printf("%d,", get_operant(regs, instrs[i + 1]) %% 8)
 		case 6:
-			regs[1] = regs[0] >> uint(combo_operant)
+			regs[1] = regs[0] >> uint(get_operant(regs, instrs[i + 1]))
 		case 7:
-			regs[2] = regs[0] >> uint(combo_operant)
+			regs[2] = regs[0] >> uint(get_operant(regs, instrs[i + 1]))
 		}
 	}
-
-	if len(print_buff) > 0 {
-		fmt.print("Part One: ")
-
-		for buf, i in print_buff {
-			if i > 0 {
-				fmt.print(",")
-			}
-			fmt.print(buf)
-		}
-		fmt.println()
-	}
+	fmt.println()
 }
 
 run_to_print :: proc(a: int, instrs: ^[]int) -> int {
@@ -189,31 +172,25 @@ run_to_print :: proc(a: int, instrs: ^[]int) -> int {
 
 	i: int
 	for i := 0; i < len(instrs); i += 2 {
-		literal_operant := instrs[i + 1]
-		combo_operant, valid := get_operant(&regs, literal_operant)
-		if !valid {
-			log.panic("program invalid")
-		}
-
 		switch instrs[i] {
 		case 0:
-			regs[0] = regs[0] >> uint(combo_operant)
+			regs[0] = regs[0] >> uint(get_operant(&regs, instrs[i + 1]))
 		case 1:
-			regs[1] = regs[1] ~ literal_operant
+			regs[1] = regs[1] ~ instrs[i + 1]
 		case 2:
-			regs[1] = combo_operant %% 8
+			regs[1] = get_operant(&regs, instrs[i + 1]) %% 8
 		case 3:
 			if regs[0] != 0 {
-				i = literal_operant - 2
+				i = instrs[i + 1] - 2
 			}
 		case 4:
 			regs[1] = regs[1] ~ regs[2]
 		case 5:
-			return combo_operant %% 8
+			return get_operant(&regs, instrs[i + 1]) %% 8
 		case 6:
-			regs[1] = regs[0] >> uint(combo_operant)
+			regs[1] = regs[0] >> uint(get_operant(&regs, instrs[i + 1]))
 		case 7:
-			regs[2] = regs[0] >> uint(combo_operant)
+			regs[2] = regs[0] >> uint(get_operant(&regs, instrs[i + 1]))
 		}
 	}
 	return -1
