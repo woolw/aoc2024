@@ -94,6 +94,7 @@ main :: proc() {
 
 	regs, instrs, ok := read_file_by_lines_in_whole("input")
 	if !ok {return}
+	defer delete(instrs)
 
 	init_A := regs[0]
 	init_B := regs[1]
@@ -152,7 +153,7 @@ part1 :: proc(regs: ^[3]int, instrs: ^[]int) {
 		case 0:
 			regs[0] = regs[0] >> uint(combo_operant)
 		case 1:
-			regs[1] = regs[1] ~ int(literal_operant)
+			regs[1] = regs[1] ~ literal_operant
 		case 2:
 			regs[1] = combo_operant %% 8
 		case 3:
