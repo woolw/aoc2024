@@ -161,13 +161,13 @@ part1 :: proc(lines: ^[]string) {
 		ori = .East,
 		pos = {0, 0},
 	}
+
 	when ODIN_DEBUG {
 		row_arr := make([]rune, EXIT_BYTE.x + 1)
 		defer delete(row_arr)
 		for y in 0 ..= EXIT_BYTE.y {
 			for x in 0 ..= EXIT_BYTE.x {
-				val, ok := maze[{x, y}]
-				if ok {
+				if val, ok := maze[{x, y}]; ok {
 					row_arr[x] = val
 				} else {
 					row_arr[x] = '.'
@@ -176,6 +176,14 @@ part1 :: proc(lines: ^[]string) {
 			}
 			line := utf8.runes_to_string(row_arr)
 			append(&origin.own_map, line)
+		}
+	} else {
+		for y in 0 ..= EXIT_BYTE.y {
+			for x in 0 ..= EXIT_BYTE.x {
+				if val, ok := maze[{x, y}]; !ok {
+					maze[{x, y}] = '.'
+				}
+			}
 		}
 	}
 
@@ -327,8 +335,7 @@ part2 :: proc(lines: ^[]string) {
 			defer delete(row_arr)
 			for y in 0 ..= EXIT_BYTE.y {
 				for x in 0 ..= EXIT_BYTE.x {
-					val, ok := maze[{x, y}]
-					if ok {
+					if val, ok := maze[{x, y}]; ok {
 						row_arr[x] = val
 					} else {
 						row_arr[x] = '.'
@@ -338,7 +345,16 @@ part2 :: proc(lines: ^[]string) {
 				line := utf8.runes_to_string(row_arr)
 				append(&origin.own_map, line)
 			}
+		} else {
+			for y in 0 ..= EXIT_BYTE.y {
+				for x in 0 ..= EXIT_BYTE.x {
+					if val, ok := maze[{x, y}]; !ok {
+						maze[{x, y}] = '.'
+					}
+				}
+			}
 		}
+
 		append(&q, origin)
 
 		for len(q) > 0 {
@@ -422,5 +438,5 @@ part2 :: proc(lines: ^[]string) {
 		break game
 	}
 
-	fmt.printfln("Part Two:", p2)
+	fmt.println("Part Two:", p2)
 }
